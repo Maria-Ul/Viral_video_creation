@@ -60,7 +60,13 @@ class Video(db.Model):
 
     def __repr__(self):
         return '<Video %r>' % self.id
-
+# clip = Clip(
+#                     video_id=video.id,
+#                     object_name=clip_object_name,
+#                     options={'name': 'name', 'desc': 'desc', 'start_at': 'start_at', 'end_at': 'end_at', 'tags': ['tag1', 'tag2']}
+#                 )
+#                 db.session.add(clip)
+#                 db.session.commit()
 class Clip(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     video_id = db.Column(db.Integer, nullable=False)
@@ -142,15 +148,6 @@ def generate(current_user):
         length=length, # Можно убрать, если используется length=None
         content_type=file.content_type,
     )
-    video = Video(
-        user_id=current_user.id,
-        status=STATUS_CREATED,
-        object_name=object_name,
-        options={'name': 'name', 'size': 'size', 'duration': 'duration', 'created_at': 'created_at'}
-    )
-    db.session.add(video)
-    db.session.commit()
-
     # Создание клипов
     video_data = client.get_object(bucket_name=bucket, object_name=object_name).data
     video_stream = io.BytesIO(video_data)
@@ -160,62 +157,35 @@ def generate(current_user):
 
         # Создаем VideoFileClip
         videoTemp = mp.VideoFileClip(temp_file.name)
-        clips = []
-        start_time = 0
-        while start_time + 5 < videoTemp.duration:  # Нарезаем по 5 секунд
-            clip = videoTemp.subclip(start_time, start_time + 5)  # Можно изменить длину клипа
-            clips.append(clip)
-            start_time += 5
+        video = Video(
+            user_id=current_user.id,
+            status=STATUS_CREATED,
+            object_name=object_name,
+            options={
+                'name': file.filename,
+                'size': sys.getsizeof(temp_file),  # Размер в ГБ
+                'duration': round(videoTemp.duration),  # Длительность в секундах
+                'created_at': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),  # Формат даты и времени
+            }
+        )
 
-        for i, clip in enumerate(clips):
-            clip_object_name = str(uuid.uuid4()) + '.mp4'
-
-            # Создаем временный файл
-            clip.write_videofile(temp_file.name, codec="libx264")
-            temp_file.flush()
-
-            # Открываем временный файл для чтения
-            with open(temp_file.name, "rb") as f:
-                clip_stream = f.read()
-
-                # Создаем BytesIO объект
-                clip_stream = io.BytesIO(clip_stream)
-
-                # Загружаем клип в S3
-                client.put_object(
-                    bucket_name=bucket,
-                    object_name=clip_object_name,
-                    data=clip_stream,
-                    length=len(clip_stream.getbuffer()),  #  Можно использовать len(clip_stream)
-                    content_type="video/mp4",
-                )
-
-
-                clip = Clip(
-                    video_id=video.id,
-                    object_name=clip_object_name,
-                    options={'name': 'name', 'desc': 'desc', 'start_at': 'start_at', 'end_at': 'end_at', 'tags': ['tag1', 'tag2']}
-                )
-                db.session.add(clip)
-                db.session.commit()
-
-
-
+        db.session.add(video)
+        db.session.commit()
             
-    body = {}
-    body['id'] = video.id
-    body['user_id'] = video.user_id
-    body['object_name'] = video.object_name
+        body = {}
+        body['id'] = video.id
+        body['user_id'] = video.user_id
+        body['object_name'] = video.object_name
 
-    credentials = pika.PlainCredentials('user', 'password')
-    parameters = pika.ConnectionParameters('rabbitmq', 5672, '/', credentials)
-    connection = pika.BlockingConnection(parameters)
-    channel = connection.channel()
-    channel.queue_declare(queue='generate')
-    channel.basic_publish(exchange='', routing_key="generate", body=json.dumps(body))
-    connection.close()
-    
-    return jsonify({"id": video.id}), 200
+        credentials = pika.PlainCredentials('user', 'password')
+        parameters = pika.ConnectionParameters('rabbitmq', 5672, '/', credentials)
+        connection = pika.BlockingConnection(parameters)
+        channel = connection.channel()
+        channel.queue_declare(queue='generate')
+        channel.basic_publish(exchange='', routing_key="generate", body=json.dumps(body))
+        connection.close()
+        
+        return jsonify({"id": video.id}), 200
 
 @app.route('/video', methods=['GET'])
 @token_required

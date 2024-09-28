@@ -6,6 +6,8 @@ import psycopg2
 import io
 from minio import Minio
 from os import environ
+import tempfile
+from examples.pipeline import generate
 
 conn = psycopg2.connect(dsn=environ.get('DATABASE_URL'))
 cursor = conn.cursor()
@@ -23,11 +25,15 @@ def main():
         
         client = Minio(environ.get('S3_ENDPOINT'), environ.get('S3_ACCESS_KEY'), environ.get('S3_SECRET_KEY'), secure=False)
         bucket = environ.get('S3_BUCKET_NAME')
-        response = client.get_object(bucket_name=bucket, object_name=object_name)
+        video_data = client.get_object(bucket_name=bucket, object_name=object_name).data
+        video_stream = io.BytesIO(video_data)
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_file:
+            temp_file.write(video_stream.getvalue())
+            temp_file.flush()
 
-        # Создаем BytesIO объект для хранения видео и запускаем нейронку
-
-        # original_video = Image.open(io.BytesIO(response.data)) 
+            # Получение пути до файла в файловой системе
+            file_path = temp_file.name
+            generate(file_path, body)
         
         
         
