@@ -4,3 +4,13 @@ openai-whisper
 pandas
 sentence_transformers
 transformers
+pika
+flask
+psycopg2-binary
+Flask-SQLAlchemy
+Flask-CORS
+werkzeug
+PyJWT==2.4.0
+pika
+minio
+moviepy

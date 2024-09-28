@@ -17,6 +17,7 @@ bucket = environ.get('S3_BUCKET_NAME')
 
 
 class User(Base):
+    __tablename__ = 'user'
     id = Column(Integer, primary_key=True)
     username = Column(String(255), unique=True, nullable=False)
     password = Column(String(255), nullable=False)
@@ -29,6 +30,7 @@ STATUS_IN_PROGRESS = 'in_progress'
 STATUS_DONE = 'done'
 
 class Video(Base):
+    __tablename__ = 'video'
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, nullable=False)
     status = Column(String(255), nullable=False)
@@ -49,6 +51,7 @@ class Video(Base):
         return '<Video %r>' % self.id
 
 class Clip(Base):
+    __tablename__ = 'clip'
     id = Column(Integer, primary_key=True)
     video_id = Column(Integer, nullable=False)
     object_name = Column(String(255), nullable=True)
@@ -75,12 +78,14 @@ def generate(video_file, body):
 
     model = Speech2TextConverter()
     model.make_transcription(video_file)
-    model.get_df_transcript()
+    model.save_df_transcript(transcript_file)
 
     df, text = read_transcript(transcript_file)
+    # print('df[:10] ', df[:10], '\n')
     key_time_segments = get_key_segments(df, text)
     output_file_path = os.path.join(output_directory,"final_video_with_audio.mp4")
-    segment_and_save_videos(video_file, audio_file, key_time_segments, output_file_path)
+    print('key_time_segments: ', key_time_segments, '\n')
+    segment_and_save_videos(video_file, audio_file, key_time_segments, output_directory)
 
     # Сохранение информации о видео в базу данных
     with SessionLocal() as db:
@@ -107,5 +112,5 @@ def generate(video_file, body):
                         object_name=object_name,
                         options={'name': object_name, 'desc': 'desc', 'start_at': 'start_at', 'end_at': 'end_at', 'tags': ['tag1', 'tag2']}
                     )
-                    db.session.add(clip)
-                    db.session.commit()
+                    db.add(clip)
+                    db.commit()

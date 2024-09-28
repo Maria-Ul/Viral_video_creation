@@ -6,7 +6,7 @@ import os
 
 def read_transcript(file_to_transcript):
     frame = pd.read_csv(file_to_transcript)
-    transcript_text = [" ".join(df['text'].tolist())]
+    transcript_text = [" ".join(frame['text'].tolist())]
     return frame, transcript_text
 
 def get_key_segments(frame, transcript_text):
@@ -38,7 +38,7 @@ def get_key_segments(frame, transcript_text):
         for phrase in summary.split():
           if phrase in row['text']:
             key_segments.append(row)
-
+    print('key_segments ', key_segments)
     return set([(row['start'], row['end']) for row in key_segments])
 
 #analyzemotions?
@@ -50,10 +50,17 @@ def segment_and_save_videos(video_path, audio_path, time_segments, output_dir):
 
     video_clips = []
     # audio_clips = []
-
-    for i, start_time, end_time in enumerate(time_segments):
-        au_subclip = audio_clip.subclip(start_time, end_time)
+    i = 0
+    for start_time, end_time in (time_segments):
+        i+=1
+        # au_subclip = audio_clip.subclip(start_time, end_time)
         v_subclip = video_clip.subclip(start_time, end_time)
+
+        # Создать аудиофайл для каждого сегмента
+        audio_file_path = os.path.join(output_dir, f"audio{str(i).zfill(3)}.wav")
+        v_subclip.audio.write_audiofile(audio_file_path)
+        au_subclip = AudioFileClip(audio_file_path) 
+
         v_subclip = v_subclip.set_audio(au_subclip)
 
         output_file = os.path.join(output_dir, f"output{str(i).zfill(3)}.mp4")
@@ -62,11 +69,11 @@ def segment_and_save_videos(video_path, audio_path, time_segments, output_dir):
         video_clips.append(v_subclip)  # Add the video with audio
 
 
-    final_clip = concatenate_videoclips(video_clips)
-    output_path = os.path.join(output_dir, f"all_clips_output.mp4")
-    final_clip.write_videofile(output_path, codec="libx264", audio_codec="aac")
+    # final_clip = concatenate_videoclips(video_clips)
+    # output_path = os.path.join(output_dir, f"all_clips_output.mp4")
+    # final_clip.write_videofile(output_path, codec="libx264", audio_codec="aac")
 
-    final_clip.close()
+    # final_clip.close()
 
 # def crop_video(faces, input_file, output_file):
 #     try:
@@ -128,12 +135,12 @@ def segment_and_save_videos(video_path, audio_path, time_segments, output_dir):
 #     except Exception as e:
 #         print(f"Error during video cropping: {str(e)}")
 
-transcription_file = '/content/transcription2.csv'
-video_file = '/content/movie2.mp4'
-audio_file = "audio.wav"
+# transcription_file = '/content/transcription2.csv'
+# video_file = '/content/movie2.mp4'
+# audio_file = "audio.wav"
 
-df, transcripted_text = read_transcript(transcription_file)
-key_time_segments = get_key_segments(df, transcripted_text)
+# df, transcripted_text = read_transcript(transcription_file)
+# key_time_segments = get_key_segments(df, transcripted_text)
 
-output_file_path = "final_video_with_audio.mp4"
-segment_and_save_videos(key_time_segments, output_file_path)
+# output_file_path = "final_video_with_audio.mp4"
+# segment_and_save_videos(key_time_segments, output_file_path)
