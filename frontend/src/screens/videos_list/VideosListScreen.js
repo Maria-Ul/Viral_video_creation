@@ -7,7 +7,7 @@ import { VideoItem } from "./VideoItem";
 import { useNavigate } from "react-router-dom";
 import { DownloadModal } from "./DownloadModal";
 import { videoHistoryRequest } from "../../api/videoHistory";
-import { CURRENT_LOGIN } from "../../api/login";
+import { CURRENT_LOGIN, SESSION_TOKEN } from "../../api/login";
 import { deleteVideoRequest } from "../../api/deleteVideo";
 
 const VideoListScreen = () => {
@@ -40,12 +40,19 @@ const VideoListScreen = () => {
             }
         })
     }
-    useEffect(() => { refreshList() }, [])
+    useEffect(() => {
+        if (sessionStorage.getItem(SESSION_TOKEN) == null) {
+            navigate('/auth')
+        } else {
+            refreshList()
+        }
+    }, [])
     const navigate = useNavigate();
     const onVideoClick = (video) => {
         navigate(`/preview/${video.id}`);
     }
 
+    // TODO обновление при загрузке
     const [open, setOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -101,13 +108,13 @@ const VideoListScreen = () => {
                             //setSelectedVideo(video)
                             //}
                         }}
-                        onDelete={() => {deleteVideo(video.id)}}
+                            onDelete={() => { deleteVideo(video.id) }}
                         />
                     </Grid2>
                 )
                 )}
             </Grid2>
-            <DownloadModal open={open} handleOpen={handleOpen} handleClose={handleClose} />
+            <DownloadModal open={open} handleOpen={handleOpen} handleClose={handleClose} onLoad={refreshList()} />
         </Stack>
     );
 }

@@ -12,7 +12,7 @@ import { BACKEND_URL, VIDEOS_UPLOAD_URL, viralClipsApi } from "../../api/baseApi
 
 registerPlugin(FilePondPluginImageExifOrientation, FilePondPluginImagePreview)
 
-export const DownloadModal = ({ open, handleOpen, handleClose }) => {
+export const DownloadModal = ({ open, handleOpen, handleClose, onLoad }) => {
     const [files, setFiles] = useState([])
     return (
         <div>
@@ -32,7 +32,7 @@ export const DownloadModal = ({ open, handleOpen, handleClose }) => {
                             acceptedFileTypes={['video/*']}
                             onupdatefiles={setFiles}
                             allowMultiple={true}
-                            maxFiles={3}
+                            maxFiles={5}
                             server={{
                                 url: BACKEND_URL,
                                 process: {
@@ -41,6 +41,7 @@ export const DownloadModal = ({ open, handleOpen, handleClose }) => {
                                     headers: {
                                         'Authorization': `Bearer ${sessionStorage.getItem(SESSION_TOKEN)}`
                                     },
+                                    onload: onLoad
                                 }
                             }
                             }

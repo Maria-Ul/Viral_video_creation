@@ -5,24 +5,21 @@ from moviepy.config import change_settings
 change_settings({"IMAGEMAGICK_BINARY": r"C:\Program Files\ImageMagick-7.1.1-Q16-HDRI\\magick.exe"})
 
 
-# "C:\\Users\\Denis\\Documents\\Projects\\CifrPr\\Viral_video_creation\\backend\\generate\\src\\add_text\\input.mp4"
+# формат subs - [((start_at, end_at), 'TEXT')]
 def add_text_by_transcript(
-        transcript: list,
+        subs: list,
         inputVideoPath: str,
         outputVideoPath: str,
         fontSize: int = 24,
-        color: str = 'white'
+        color: str = 'white',
+        subtitlesPosition: tuple[str, str] = ('center', 'bottom')
 ):
     generator = lambda txt: TextClip(txt, font='Arial', fontsize=fontSize, color=color)
-    subs = [((0, 4), 'subs1'),
-            ((4, 9), 'subs2'),
-            ((9, 12), 'subs3'),
-            ((12, 16), 'subs4')]
 
     subtitles = SubtitlesClip(subs, generator)
 
     video = VideoFileClip(inputVideoPath)
-    result = CompositeVideoClip([video, subtitles.set_pos(('center', 'bottom'))])
+    result = CompositeVideoClip([video, subtitles.set_pos(subtitlesPosition)])
 
     result.write_videofile(
         outputVideoPath,
@@ -31,3 +28,10 @@ def add_text_by_transcript(
         remove_temp=True, codec="libx264",
         audio_codec="aac"
     )
+
+add_text_by_transcript(subs=[
+    ((0, 5), 'TEXT')
+],
+                       inputVideoPath='input.mp4',
+                       outputVideoPath='output.mp4',
+                       subtitlesPosition=('center', 'bottom'))

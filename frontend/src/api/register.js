@@ -1,5 +1,5 @@
 import { viralClipsApi } from "./baseApi"
-import { SESSION_TOKEN } from "./login"
+import { CURRENT_LOGIN, SESSION_TOKEN } from "./login"
 
 export const registerReguset = async ({username, password, onSuccess, onError}) => {
     var response = await viralClipsApi.post(
@@ -12,7 +12,7 @@ export const registerReguset = async ({username, password, onSuccess, onError}) 
     if (response.status == 201) {
         //AsyncStorage.setItem(SESSION_TOKEN, response.data.token)
         sessionStorage.setItem(SESSION_TOKEN, response.data.token)
-        sessionStorage.setItem(SESSION_TOKEN, response.data.token)
+        sessionStorage.setItem(CURRENT_LOGIN, username)
         console.log(response)
         onSuccess()
     } else {
