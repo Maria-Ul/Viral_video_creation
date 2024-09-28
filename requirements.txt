@@ -1,4 +1,7 @@
 datetime
 ffmpeg
 openai-whisper
+os
 pandas
+sentence_transformers
+transformers

@@ -1,6 +1,7 @@
 import os
 from src.utils.speech2text import Speech2TextConverter
 
+
 input_file = 'data/movie.mp4'
 output_directory = 'data/processed'
 

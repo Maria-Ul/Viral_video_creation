@@ -2,6 +2,7 @@ import pandas as pd
 from sentence_transformers import SentenceTransformer, util
 from transformers import pipeline
 
+
 class TranscriptClassifier:
     sentence_llm = SentenceTransformer('DeepPavlov/rubert-base-cased-sentence')
     emotion_classifier = pipeline('text-classification', model='sismetanin/rubert-base-cased-emotion-russian')
