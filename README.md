@@ -18,25 +18,29 @@ This repository contains the code for a service that takes video as input and ge
 - **Computer Vision**: To identify visual patterns and select the most impactful frames.
 - **Natural Language Processing**: For subtitle generation and context analysis when speech is present.
 
-## Getting Started
+### Для работы с проектом нужны:
 
-1. Clone the repository:
-    ```bash
-    git clone https://github.com/yourusername/viral-clip-creator.git
-    ```
-2. Install the required dependencies:
-    ```bash
-    pip install -r requirements.txt
-    ```
-3. Run the service (in progress):
-    ```bash
-    python app.py
-    ```
+- `Docker Compose version v2.19.1`
+  
+- `GNU Make 4.2.1`
+  
+- Видеокарта с CUDA (NVidia > 8 GB)
 
-## Contributing
+- Оперативная память > 16 GB
 
-to be added
+### Основные команды
 
----
+- Запуск DEV окружения - команда `make dev`
 
-This project aims to simplify the process of creating viral content by leveraging the power of AI to automate video analysis and highlight extraction.
+- Запуск PROD окружения - команда `make prod`
+
+- Остановить работу приложения - команда `make ddown`
+
+### Структура проекта
+
+/build_env - все необходимое для docker окружения
+
+/frontend - клиентское приложение
+
+/backend - серверное приложение
+
