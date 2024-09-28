@@ -4,26 +4,13 @@ import { defaultLayoutIcons, DefaultVideoLayout } from '@vidstack/react/player/l
 import React from 'react';
 import AppHeader from '../../components/AppHeader';
 import { ChevronLeft } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 // https://github.com/vladmandic/face-api
-function ClipEditorScreen({ video, clip }) {
-    const testClip = {
-        preview: "https://i.pinimg.com/originals/e8/40/6f/e8406fdb6884a7c76d4a7cf9db55c774.jpg",
-        name: "Test clip",
-        startTime: 0.0,
-        endTime: 100,
-        description: "Cool clip",
-        tags: ["#cool", "#awesome"]
-    }
-    const testVideo1 = {
-        id: "123123",
-        name: "TEST.mp4",
-        summary: "Cool video",
-        durationS: 629,
-        url: "https://files.vidstack.io/sprite-fight/720p.mp4",
-        preview: "https://lh3.googleusercontent.com/_X4oEpRu4O-nv0KuFwJQV2zX5SLuwRg9fIM1_-Q29L50zDgRd2eLdEr0ZmLVk_cPLA4",
-        size: "10 Гб"
-    }
+function ClipEditorScreen() {
+    const params = useParams()
+    const clipId = params.clipId
+
+    
     const navigate = useNavigate()
     return (
         <Stack>

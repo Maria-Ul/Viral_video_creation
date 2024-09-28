@@ -1,33 +1,46 @@
 import { Box, Button, colors, Grid2, Stack, Toolbar, Typography } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import VideoDetails from "./VideoDetails";
 import AppHeader from "../../components/AppHeader";
 import { FileUpload, VideoCameraBackTwoTone } from "@mui/icons-material";
 import { VideoItem } from "./VideoItem";
 import { useNavigate } from "react-router-dom";
 import { DownloadModal } from "./DownloadModal";
+import { videoHistoryRequest } from "../../api/videoHistory";
+import { CURRENT_LOGIN } from "../../api/login";
+import { deleteVideoRequest } from "../../api/deleteVideo";
 
 const VideoListScreen = () => {
-    const testVideo1 = {
-        id: "123123",
-        name: "TEST.mp4",
-        summary: "Cool video",
-        preview: "https://lh3.googleusercontent.com/_X4oEpRu4O-nv0KuFwJQV2zX5SLuwRg9fIM1_-Q29L50zDgRd2eLdEr0ZmLVk_cPLA4",
-        size: "10 Гб"
-    }
-    const testVideo2 = {
-        id: "1231423423",
-        name: "LongLongLongLongLongLongLongLongLongLong Name.mp4",
-        summary: "Cool video",
-        preview: "https://lh3.googleusercontent.com/_X4oEpRu4O-nv0KuFwJQV2zX5SLuwRg9fIM1_-Q29L50zDgRd2eLdEr0ZmLVk_cPLA4",
-        size: "10 Гб"
-    }
-    const [videosList, setVideosList] = useState([testVideo1, testVideo2, testVideo1, testVideo2,
-        testVideo1, testVideo2, testVideo1, testVideo2,
-        testVideo1, testVideo2, testVideo1, testVideo2,
-    ]);
+    // const testVideo1 = {
+    //     id: "123123",
+    //     name: "TEST.mp4",
+    //     summary: "Cool video",
+    //     preview: "https://lh3.googleusercontent.com/_X4oEpRu4O-nv0KuFwJQV2zX5SLuwRg9fIM1_-Q29L50zDgRd2eLdEr0ZmLVk_cPLA4",
+    //     size: "10 Гб"
+    // }
+    // const testVideo2 = {
+    //     id: "1231423423",
+    //     name: "LongLongLongLongLongLongLongLongLongLong Name.mp4",
+    //     summary: "Cool video",
+    //     preview: "https://lh3.googleusercontent.com/_X4oEpRu4O-nv0KuFwJQV2zX5SLuwRg9fIM1_-Q29L50zDgRd2eLdEr0ZmLVk_cPLA4",
+    //     size: "10 Гб"
+    // }
+    const [videosList, setVideosList] = useState([]);
     //const [selectedVideo, setSelectedVideo] = useState(null);
-
+    const refreshList = () => {
+        videoHistoryRequest({
+            onSuccess: (data) => { setVideosList(data) }
+        })
+    }
+    const deleteVideo = (videoId) => {
+        deleteVideoRequest({
+            videoId: videoId,
+            onSuccess: () => {
+                refreshList()
+            }
+        })
+    }
+    useEffect(() => { refreshList() }, [])
     const navigate = useNavigate();
     const onVideoClick = (video) => {
         navigate(`/preview/${video.id}`);
@@ -53,7 +66,8 @@ const VideoListScreen = () => {
                         <VideoCameraBackTwoTone />
                         <Typography ml={2} variant="h6">Ваши видео</Typography>
                     </Stack>
-                    <Stack direction={'row'} spacing={3}>
+                    <Stack direction={'row'} spacing={3} alignItems={'center'}>
+                        <Typography variant="h6" mr={5}>{`Добро пожаловать, ${sessionStorage.getItem(CURRENT_LOGIN)}`}</Typography>
                         <Button color='white' variant='outlined' startIcon={<FileUpload />}
                             onClick={handleOpen}>Загрузить видео</Button>
                         <Button color='white' variant='outlined' onClick={() => {
@@ -86,7 +100,9 @@ const VideoListScreen = () => {
                             //} else {
                             //setSelectedVideo(video)
                             //}
-                        }} />
+                        }}
+                        onDelete={() => {deleteVideo(video.id)}}
+                        />
                     </Grid2>
                 )
                 )}

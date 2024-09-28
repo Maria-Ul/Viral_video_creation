@@ -12,6 +12,7 @@ export const registerReguset = async ({username, password, onSuccess, onError}) 
     if (response.status == 201) {
         //AsyncStorage.setItem(SESSION_TOKEN, response.data.token)
         sessionStorage.setItem(SESSION_TOKEN, response.data.token)
+        sessionStorage.setItem(SESSION_TOKEN, response.data.token)
         console.log(response)
         onSuccess()
     } else {

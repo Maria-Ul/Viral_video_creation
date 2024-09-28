@@ -27,6 +27,7 @@ export const DownloadModal = ({ open, handleOpen, handleClose }) => {
                     p={5} borderRadius={1} spacing={5}>
                         <Typography variant="h5">Загрузка видео</Typography>
                         <FilePond
+                            
                             files={files}
                             acceptedFileTypes={['video/*']}
                             onupdatefiles={setFiles}
@@ -36,14 +37,14 @@ export const DownloadModal = ({ open, handleOpen, handleClose }) => {
                                 url: BACKEND_URL,
                                 process: {
                                     url: VIDEOS_UPLOAD_URL,
-                                    withCredentials: true,
+                                    //withCredentials: true,
                                     headers: {
                                         'Authorization': `Bearer ${sessionStorage.getItem(SESSION_TOKEN)}`
                                     },
                                 }
                             }
                             }
-                            name="files" /* sets the file input name, it's filepond by default */
+                            name="video" /* sets the file input name, it's filepond by default */
                             labelIdle='Перетащите или <span class="filepond--label-action">Выберете файл</span>'
                         />
                         <Button mt={10} onClick={handleClose}>Закрыть</Button>

@@ -9,6 +9,9 @@ import { PlyrLayout, plyrLayoutIcons } from '@vidstack/react/player/layouts/plyr
 import React, { useEffect, useRef } from 'react';
 import { styled } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
+import { BACKEND_URL, FILE_ACCESS_LINK } from '../../api/baseApi';
+
+export const getVideoLink =  (video) => { return BACKEND_URL + FILE_ACCESS_LINK + `/${video.object_name}` }
 
 const HtmlTooltip = styled(({ className, ...props }) => (
     <Tooltip {...props} classes={{ popper: className }} />
@@ -23,7 +26,7 @@ const HtmlTooltip = styled(({ className, ...props }) => (
 }));
 
 export const VideoEditor = (
-    { video, selectedClip, clipList }
+    { videoTime, video, selectedClip, clipList }
 ) => {
     const navigate = useNavigate()
     const onClipClick = (clip) => {
@@ -33,8 +36,9 @@ export const VideoEditor = (
         <Stack p={4} bgcolor={colors.grey[200]}>
             <MediaPlayer
                 title="Sprite Fight"
-                src={video.url}
+                src={getVideoLink(video)}
                 autoplay
+                currentTime={videoTime}
             >
                 <MediaProvider />
 
@@ -50,7 +54,7 @@ export const VideoEditor = (
                                 <>
                                     {
                                         clipList.map((clip) => {
-                                            console.log((clip.endTime - clip.startTime) / video.durationS * 100)
+                                            console.log((clip.options.end_at - clip.options.start_at) / video.durationS * 100)
                                             return (
                                                 <Box sx={{
                                                     bgcolor: colors.blue[800],
@@ -58,9 +62,9 @@ export const VideoEditor = (
                                                     height: 30,
                                                     borderRadius: '0 8px 8px 8px',
                                                     //border: 'white solid 1px',
-                                                    width: `${(clip.endTime - clip.startTime) / video.durationS * 100}%`,
+                                                    width: `${(clip.options.end_at - clip.options.start_at) / video.durationS * 100}%`,
                                                     top: 8,
-                                                    left: `${clip.startTime / video.durationS * 100 + 1.5}%`,
+                                                    left: `${clip.options.start_at / video.durationS * 100 + 1.5}%`,
                                                 }}></Box>
                                             )
                                         }

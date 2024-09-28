@@ -1,26 +1,35 @@
-import { Button, Card, CardActionArea, CardActions, CardContent, CardMedia, Stack, Typography } from "@mui/material";
+import { Badge, Button, Card, CardActionArea, CardActions, CardContent, CardMedia, Chip, Stack, Typography } from "@mui/material";
+import { getVideoLink } from "../video_details/VideoEditor";
 
-export const VideoItem = ({video, 
+
+const statuses = {
+    'created': {text:'Создано', color: 'primary'},
+    'in_progress': {text:'Обрабатывается', color: 'secondary'},
+    'done': {text:'Обработано', color: 'success'}
+}
+export const VideoItem = ({ video,
     onClick,
     onDelete,
 }) => {
-    return ( 
+    return (
         <Card>
             <CardActionArea onClick={onClick}>
-                <CardMedia
+                {/* <CardMedia
                     component='img'
                     height={'25%'}
                     image={video.preview}
-                />
+                /> */}
                 <CardContent>
-                    <Typography>{video.name}</Typography>
-                    <Typography>{video.size}</Typography>
-
+                    <Typography variant="h6">{`${video.options.name}`}</Typography>
+                    <Typography>{`Файл: ${video.object_name}`}</Typography>
+                    <Typography>{`Размер: ${video.options.size}`}</Typography>
+                    <Chip label={statuses[video.status].text} color={statuses[video.status].color}/>
+                        
                 </CardContent>
             </CardActionArea>
             <CardActions>
                 <Button size="small" color='error' onClick={onDelete}>Удалить</Button>
             </CardActions>
         </Card>
-     );
+    );
 }
