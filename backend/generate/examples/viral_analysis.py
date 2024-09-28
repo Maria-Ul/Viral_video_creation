@@ -39,7 +39,7 @@ def get_key_segments(frame, transcript_text):
           if phrase in row['text']:
             key_segments.append(row)
     print('key_segments ', key_segments)
-    return set([(row['start'], row['end']) for row in key_segments])
+    return set([(row['start'], row['end'], row['text']) for row in key_segments])
 
 #analyzemotions?
 
@@ -51,7 +51,7 @@ def segment_and_save_videos(video_path, audio_path, time_segments, output_dir):
     video_clips = []
     # audio_clips = []
     i = 0
-    for start_time, end_time in (time_segments):
+    for start_time, end_time, text in (time_segments):
         i+=1
         # au_subclip = audio_clip.subclip(start_time, end_time)
         v_subclip = video_clip.subclip(start_time, end_time)
