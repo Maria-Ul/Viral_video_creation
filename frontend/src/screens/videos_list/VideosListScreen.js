@@ -5,6 +5,7 @@ import AppHeader from "../../components/AppHeader";
 import { FileUpload, VideoCameraBackTwoTone } from "@mui/icons-material";
 import { VideoItem } from "./VideoItem";
 import { useNavigate } from "react-router-dom";
+import { DownloadModal } from "./DownloadModal";
 
 const VideoListScreen = () => {
     const testVideo1 = {
@@ -31,6 +32,10 @@ const VideoListScreen = () => {
     const onVideoClick = (video) => {
         navigate(`/preview/${video.id}`);
     }
+
+    const [open, setOpen] = React.useState(false);
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => setOpen(false);
     return (
         <Stack direction={"column"} bgcolor={colors.grey[200]} height={'100vh'}
             sx={{
@@ -42,19 +47,28 @@ const VideoListScreen = () => {
                     direction={'row'}
                     alignItems={'center'}
                     justifyContent={'space-between'}
+
                 >
                     <Stack direction={'row'} alignItems={'center'}>
                         <VideoCameraBackTwoTone />
                         <Typography ml={2} variant="h6">Ваши видео</Typography>
                     </Stack>
-                    <Button color='white' variant='outlined' startIcon={<FileUpload />}>Загрузить видео</Button>
+                    <Stack direction={'row'} spacing={3}>
+                        <Button color='white' variant='outlined' startIcon={<FileUpload />}
+                            onClick={handleOpen}>Загрузить видео</Button>
+                        <Button color='white' variant='outlined' onClick={() => {
+                            navigate('/auth')
+                        }
+                        } >Выйти</Button>
+                    </Stack>
+
                 </Stack>
             </AppHeader>
             <Toolbar />
-            <Grid2 
-            pt={2}
-            pb={2}
-            container
+            <Grid2
+                pt={2}
+                pb={2}
+                container
                 sx={{
                     overflowY: 'auto',
                     height: '100%'
@@ -64,7 +78,7 @@ const VideoListScreen = () => {
                 pl={2} pr={2}
                 columns={{ xs: 6, sm: 8, md: 12 }}>
                 {videosList.map((video, index) => (
-                    <Grid2 key={index} size={{ xs: 2, sm: 4, md: 3 }}>
+                    <Grid2 key={index} size={{ xs: 3, sm: 4, md: 3 }}>
                         <VideoItem video={video} onClick={() => {
                             onVideoClick(video)
                             //if (video == selectedVideo) {
@@ -77,6 +91,7 @@ const VideoListScreen = () => {
                 )
                 )}
             </Grid2>
+            <DownloadModal open={open} handleOpen={handleOpen} handleClose={handleClose} />
         </Stack>
     );
 }

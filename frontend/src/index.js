@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
@@ -9,6 +8,7 @@ import VideoPreviewScreen from './screens/video_details/VideoPreviewScreen';
 import ClipEditorScreen from './screens/clip_editor/ClipEditorScreen';
 import VideoListScreen from './screens/videos_list/VideosListScreen';
 import { AuthScreen } from './screens/auth/AuthScreen';
+
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 

@@ -33,10 +33,10 @@ function ClipEditorScreen({ video, clip }) {
                     direction={'row'}
                     alignItems={'center'}
                 >
-                    <IconButton onClick={() => { navigate('/') }}>
+                    <IconButton onClick={() => { navigate(`/preview/${testVideo1.id}`) }}>
                         <ChevronLeft />
                     </IconButton>
-                    <Typography ml={2} variant="h6">Редактировать клип</Typography>
+                    <Typography ml={2} variant="h6">{`Редактировать клип ${testClip.name}`}</Typography>
                 </Stack>
             </AppHeader>
             <Toolbar />
