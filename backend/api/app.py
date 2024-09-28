@@ -142,7 +142,12 @@ def generate(current_user):
         length=length, # Можно убрать, если используется length=None
         content_type=file.content_type,
     )
-    video = Video(user_id=current_user.id, status=STATUS_CREATED, object_name=object_name, options={})
+    video = Video(
+        user_id=current_user.id,
+        status=STATUS_CREATED,
+        object_name=object_name,
+        options={'name': 'name', 'size': 'size', 'duration': 'duration', 'created_at': 'created_at'}
+    )
     db.session.add(video)
     db.session.commit()
 
@@ -186,7 +191,11 @@ def generate(current_user):
                 )
 
 
-                clip = Clip(video_id=video.id, object_name=clip_object_name, options={})
+                clip = Clip(
+                    video_id=video.id,
+                    object_name=clip_object_name,
+                    options={'name': 'name', 'desc': 'desc', 'start_at': 'start_at', 'end_at': 'end_at', 'tags': ['tag1', 'tag2']}
+                )
                 db.session.add(clip)
                 db.session.commit()
 
