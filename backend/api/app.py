@@ -11,12 +11,13 @@ import json
 from minio import Minio
 import sys
 import io
+import uuid
 
 app = Flask(__name__)
 CORS(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('DATABASE_URL')
-app.config['SECRET_KEY'] = 'super_secret'  # Замените на свой секретный ключ
-app.config['JWT_EXPIRATION_DELTA'] = datetime.timedelta(minutes=1440)  # Время жизни токена
+app.config['SECRET_KEY'] = 'super_secret'
+app.config['JWT_EXPIRATION_DELTA'] = datetime.timedelta(minutes=1440)
 db = SQLAlchemy(app)
 
 client = Minio(environ.get('S3_ENDPOINT'), environ.get('S3_ACCESS_KEY'), environ.get('S3_SECRET_KEY'), secure=False)
@@ -36,10 +37,29 @@ STATUS_CREATED = 'created'
 STATUS_IN_PROGRESS = 'in_progress'
 STATUS_DONE = 'done'
 
-class History(db.Model):
+class Video(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, nullable=False)
     status = db.Column(db.String(255), nullable=False)
+    object_name = db.Column(db.String(255), nullable=False)
+    options = db.Column(db.JSON, nullable=False)
+
+    @property
+    def serialize(self):
+       return {
+           'id'         : self.id,
+           'user_id'  : self.user_id,
+           'status'  : self.status,
+           'object_name'  : self.object_name,
+           'options'  : self.options,
+       }
+
+    def __repr__(self):
+        return '<Video %r>' % self.id
+
+class Clip(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    video_id = db.Column(db.Integer, nullable=False)
     object_name = db.Column(db.String(255), nullable=True)
     options = db.Column(db.JSON, nullable=False)
 
@@ -47,13 +67,13 @@ class History(db.Model):
     def serialize(self):
        return {
            'id'         : self.id,
-           'status'  : self.status,
+           'video_id'  : self.video_id,
            'object_name'  : self.object_name,
            'options'  : self.options,
        }
 
     def __repr__(self):
-        return '<History %r>' % self.object_name
+        return '<Clip %r>' % self.id
 
 with app.app_context():
     db.create_all()
@@ -101,55 +121,31 @@ def login():
     token = encode({'id': user.id, 'exp': datetime.datetime.utcnow() + app.config['JWT_EXPIRATION_DELTA']}, app.config['SECRET_KEY'], algorithm='HS256')
     return jsonify({'token': token}), 200
 
-@app.route('/generate', methods=['POST'])
+@app.route('/video', methods=['POST'])
 @token_required
 def generate(current_user):
-    postData = request.get_json()
-    if not postData or not 'type' in postData or not 'options' in postData:
-        return jsonify({'error': 'Missing image parameters'}), 400
-    
-    typeOfGenerate = postData['type']
-    optionsOfGenerate = postData['options']
-    valid = True
-    if 'image' == typeOfGenerate:
-        if not optionsOfGenerate or not 'width' in optionsOfGenerate or not 'height' in optionsOfGenerate or not 'count' in optionsOfGenerate or not 'product_type' in optionsOfGenerate or not 'positive_prompt' in optionsOfGenerate or not 'negative_prompt' in optionsOfGenerate or not 'offer' in optionsOfGenerate:
-            valid = False
-    elif 'banner' == typeOfGenerate:
-        if not optionsOfGenerate or not 'type' in optionsOfGenerate or not 'position' in optionsOfGenerate or not 'color' in optionsOfGenerate or not 'image_id' in optionsOfGenerate:
-            valid = False
-    elif 'inpaint' == typeOfGenerate:
-        if not 'image_id' in optionsOfGenerate or not 'mask' in optionsOfGenerate or not 'positive_prompt' in optionsOfGenerate or not 'negative_prompt' in optionsOfGenerate:
-            valid = False
+    if "video" not in request.files:
+        return "No file part", 400
 
-    if False == valid:
-        return jsonify({'error': 'Missing banner parameters'}), 400
+    file = request.files["video"]
+    object_name = uuid.uuid4()
+    client.put_object(
+        bucket_name=bucket,
+        object_name=object_name,
+        data=file.stream,
+        length=len(file.stream.read()),
+        content_type=file.content_type,
+    )
 
-    historyIds = []
-    if 'image' == typeOfGenerate:
-        for i in range(int(optionsOfGenerate["count"])):
-            history = History(user_id=current_user.id, status=STATUS_CREATED, options=optionsOfGenerate)
-            db.session.add(history)
-            db.session.commit()
-            historyIds.append({"id": history.id})
-    if 'banner' == typeOfGenerate:
-        history = History(user_id=current_user.id, status=STATUS_CREATED, options=optionsOfGenerate)
-        db.session.add(history)
-        db.session.commit()
-        historyIds.append({"id": history.id})
-    if 'inpaint' == typeOfGenerate:
-        history = History.query.filter(History.id == optionsOfGenerate['image_id']).first()
-        optionsOfGenerate['width'] = history['width']
-        optionsOfGenerate['height'] = history['height']
-        history = History(user_id=current_user.id, status=STATUS_CREATED, options=optionsOfGenerate)
-        db.session.add(history)
-        db.session.commit()
-        historyIds.append({"id": history.id})
+    video = Video(user_id=current_user.id, status=STATUS_CREATED, object_name=object_name)
+    db.session.add(video)
+    db.session.commit()
             
     body = {}
-    body['options'] = optionsOfGenerate
-    body['type'] = typeOfGenerate
-    body['user_id'] = current_user.id
-    body['history_ids'] = historyIds
+    body['id'] = video.id
+    body['user_id'] = video.user_id
+    body['object_name'] = video.object_name
+
     credentials = pika.PlainCredentials('user', 'password')
     parameters = pika.ConnectionParameters('rabbitmq', 5672, '/', credentials)
     connection = pika.BlockingConnection(parameters)
@@ -158,51 +154,58 @@ def generate(current_user):
     channel.basic_publish(exchange='', routing_key="generate", body=json.dumps(body))
     connection.close()
     
-    return jsonify(historyIds), 200
+    return jsonify({"id": video.id}), 200
 
-@app.route('/history', methods=['GET'])
+@app.route('/video', methods=['GET'])
 @token_required
-def history(current_user):
-    print(current_user, file=sys.stderr)
+def videos(current_user):
     id_get = request.args.getlist('id')
     if id_get:
-        history = History.query.filter(History.user_id == current_user.id, History.id.in_(id_get)).order_by(History.id.desc()).all()
+        history = Video.query.filter(Video.user_id == current_user.id, Video.id.in_(id_get)).order_by(Video.id.desc()).all()
     else:
-        history = History.query.filter(History.user_id == current_user.id).order_by(History.id.desc()).all()
+        history = Video.query.filter(Video.user_id == current_user.id).order_by(Video.id.desc()).all()
     return jsonify([i.serialize for i in history]), 200
 
-@app.route('/image/<object_name>', methods=['GET'])
+@app.route('/clip', methods=['GET'])
+@token_required
+def clips(current_user):
+    video_id = request.args.get('video_id')
+    history = Clip.query.filter(Clip.video_id == video_id).order_by(Clip.id.desc()).all()
+
+    return jsonify([i.serialize for i in history]), 200
+
+@app.route('/files/<object_name>', methods=['GET'])
 # @token_required
-def getImage(object_name):
+def getFile(object_name):
     try:
         assert object_name == request.view_args['object_name']
         response = client.get_object(bucket_name=bucket, object_name=object_name)
 
-        # Создаем BytesIO объект для хранения изображения
-        image_stream = io.BytesIO(response.data)
+        # Создаем BytesIO объект для хранения файла
+        file_stream = io.BytesIO(response.data)
 
-        # Отправляем изображение в ответ на HTTP-запрос
-        return send_file(image_stream, mimetype='image/png')
+        # Отправляем файл в ответ на HTTP-запрос
+        return send_file(file_stream, mimetype=response.content_type)
     except Exception as e:
         # Обработка ошибок
-        return 'Ошибка при получении изображения: {}'.format(e), 500
+        return 'Ошибка при получении файла: {}'.format(e), 500
 
-@app.route('/image/<id>', methods=['DELETE'])
+@app.route('/video/<id>', methods=['DELETE'])
 @token_required
 def removeImage(current_user, id):
     assert id == request.view_args['id']
-    history = History.query.filter(History.id == id).first()
+    history = Video.query.filter(Video.id == id).first()
     if STATUS_DONE == history.status:
         client.remove_object(bucket_name=bucket, object_name=history.object_name)
-    History.query.filter(History.id == id).delete()
+    Video.query.filter(Video.id == id).delete()
     db.session.commit()
     return jsonify({}), 200
 
 @app.route('/image', methods=['DELETE'])
 @token_required
 def removeImages(current_user):
-    histories = History.query.filter(History.user_id == current_user.id).all()
-    History.query.filter(History.user_id == current_user.id).delete()
+    histories = Video.query.filter(Video.user_id == current_user.id).all()
+    Video.query.filter(Video.user_id == current_user.id).delete()
     for history in histories:
         if STATUS_DONE == history.status:
             client.remove_object(bucket_name=bucket, object_name=history.object_name)

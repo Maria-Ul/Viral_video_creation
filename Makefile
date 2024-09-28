@@ -1,10 +1,6 @@
 # Поднять прод окружение
-prod:
-		docker compose --env-file build_env/.env.prod up -d --build
-
-# Поднять дев окружение
-dev:
-		docker compose --env-file build_env/.env.dev up -d --build
+up:
+		docker compose up -d --build
 
 # Удалить все контейнеры
 ddown:

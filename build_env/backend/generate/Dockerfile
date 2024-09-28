@@ -4,6 +4,7 @@ WORKDIR /app
 
 COPY ./backend/generate/requirements.txt ./
 
+RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
 COPY ./backend/generate .

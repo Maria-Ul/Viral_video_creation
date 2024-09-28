@@ -76,39 +76,38 @@ paths:
                     description: The JWT token
         '401':
           description: Invalid credentials
-  /generate:
+  /video:
     post:
       tags:
-        - "Image"
-      summary: Generate image/banner/inpaint
+        - "Video"
+      summary: Send video
       security:
         - bearerAuth: []
       requestBody:
         content:
-          application/json:
+          multipart/form-data:
             schema:
               type: object
               properties:
-                type:
+                video:
                   type: string
-                  enum:
-                    - image
-                    - banner
-                    - inpaint
-                options:
-                  type: object
-                  oneOf:
-                    - $ref: '#/components/schemas/Image'
-                    - $ref: '#/components/schemas/Banner'
-                    - $ref: '#/components/schemas/Inpaint'
+                  format: binary
+                  description: The uploaded file data
       responses:
         '200':
           description: Start generate
-  /history:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
     get:
       tags:
-        - "Image"
-      summary: Get history of images
+        - "Video"
+      summary: Get history of videos
       parameters:
       - name: id
         in: query
@@ -121,7 +120,7 @@ paths:
         - bearerAuth: []
       responses:
         '200':
-          description: Image list
+          description: Video list
           content:
             application/json:
               schema:
@@ -131,24 +130,27 @@ paths:
                   properties:
                     id:
                       type: string
-                      description: id of history
+                      description: id of video
                     status:
                       type: string
-                      description: Status of history
+                      description: Status of video
                     object_name:
                       type: string
-                      description: Image
-                    options:
-                      type: object
-                      oneOf:
-                        - $ref: '#/components/schemas/Image'
-                        - $ref: '#/components/schemas/Banner'
-                        - $ref: '#/components/schemas/Inpaint'
-  /image/{object_name}:
+                      description: Video
+    delete:
+      tags:
+        - "Video"
+      summary: Remove all images from history
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Video Removed
+  /video/{object_name}:
     get:
       tags:
-        - "Image"
-      summary: Get image from history
+        - "Video"
+      summary: Get video from history
       parameters:
         - in: path
           name: object_name
@@ -160,12 +162,12 @@ paths:
         - bearerAuth: []
       responses:
         '200':
-          description: Image
-  /image/{id}:
+          description: Video
+  /video/{id}:
     delete:
       tags:
-        - "Image"
-      summary: Remove image from history
+        - "Video"
+      summary: Remove video from history
       parameters:
         - in: path
           name: id
@@ -177,17 +179,35 @@ paths:
         - bearerAuth: []
       responses:
         '200':
-          description: Image Removed
-  /image:
-    delete:
+          description: Video Removed
+  /clip:
+    get:
       tags:
-        - "Image"
-      summary: Remove all images from history
+        - "Clip"
+      summary: Get history of Clip
+      parameters:
+      - name: video_id
+        in: query
+        schema:
+          type: integer
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: Images Removed
+          description: Clip list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: id of Clip
+                    object_name:
+                      type: string
+                      description: Clip
 components:
   securitySchemes:
     bearerAuth:
@@ -228,47 +248,3 @@ components:
         - height
         - count
         - product_type
-    Banner:
-      type: object
-      properties:
-        image_id:
-          type: integer
-          description: Id of image to generate banner
-          example: 1
-        type:
-          type: string
-          description: Type of banner
-          example: credit_card
-        position:
-          type: string
-          description: Position of banner
-          example: center
-        color:
-          type: string
-          description: Color of banner
-          example: blue
-      required:
-        - image_id
-        - type
-        - position
-        - color
-    Inpaint:
-      type: object
-      properties:
-        image_id:
-          type: integer
-          description: Id of image to inpaint
-          example: 1
-        mask:
-          type: string
-          description: Mask to inpaint
-          example: 1, 15
-        positive_prompt:
-          type: string
-          description: Positive promt
-        negative_prompt:
-          type: string
-          description: Negative promt
-      required:
-        - image_id
-        - mask
