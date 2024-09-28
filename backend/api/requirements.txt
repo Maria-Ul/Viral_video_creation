@@ -1,0 +1,8 @@
+flask
+psycopg2-binary
+Flask-SQLAlchemy
+Flask-CORS
+werkzeug
+PyJWT==2.4.0
+pika
+minio
