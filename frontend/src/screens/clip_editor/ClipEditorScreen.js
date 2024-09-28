@@ -72,10 +72,8 @@ function ClipEditorScreen() {
                             }}
                                 aspectRatio='9/16'
                                 title="Sprite Fight"
-                                src={getVideoLink(video)}
-                                autoplay
-                                clipStartTime={0}
-                                clipEndTime={50}
+                                src={getVideoLink(clip)}
+                                autoplayS
                             >
                                 <Box
                                     position='absolute'
