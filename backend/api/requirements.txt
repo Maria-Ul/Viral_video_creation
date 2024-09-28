@@ -6,3 +6,4 @@ werkzeug
 PyJWT==2.4.0
 pika
 minio
+moviepy
