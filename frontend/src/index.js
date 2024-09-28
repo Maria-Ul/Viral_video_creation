@@ -26,7 +26,7 @@ const router = createBrowserRouter([
     element: <VideoPreviewScreen/>
   },
   {
-    path: "/editor/:clipId",
+    path: "/editor/:videoId/:clipId",
     element: <ClipEditorScreen/>
   }
 ])

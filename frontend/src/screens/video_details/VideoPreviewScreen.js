@@ -1,5 +1,5 @@
 import { ChevronLeft } from '@mui/icons-material';
-import { Grid2, IconButton, Stack, Toolbar, Typography } from '@mui/material';
+import { Box, colors, Grid2, IconButton, Stack, Toolbar, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import AppHeader from '../../components/AppHeader';
 import { ClipItem } from './ClipItem';
@@ -8,6 +8,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { clipHistoryRequest } from '../../api/clipHistory';
 import { deleteClipRequest } from '../../api/deleteClip';
 import { getVideoByIdRequest } from '../../api/getVideoById';
+import { VideoTranscript } from './VideoTranscript';
 
 // https://codepen.io/binaryunit/pen/MWZGRej
 function VideoPreviewScreen() {
@@ -65,10 +66,14 @@ function VideoPreviewScreen() {
     const [clipList, setClipList] = useState([])
     const [selectedClip, setSelectedClip] = useState(null)
     const [currentVideoTime, setVideoTime] = useState(0)
+    const onSelectTiming = (timingS) => {
+        setVideoTime(0)
+        setVideoTime(timingS)
+    }
     const navigate = useNavigate()
-    const onClipClick = (clip) => {
-        navigate(`/editor/${clip.id}`)
-    } 
+    const onClipClick = (clipId) => {
+        navigate(`/editor/${video.id}/${clipId}`)
+    }
     return (
         <Stack>
             <AppHeader>
@@ -85,7 +90,7 @@ function VideoPreviewScreen() {
             </AppHeader>
             <Toolbar />
             <Grid2 container>
-                <Grid2 size={4}>
+                <Grid2 size={3}>
                     <Stack p={2} spacing={2} height={'87vh'} sx={{ overflowY: 'auto' }}>
                         {
                             clipList.map((clip) =>
@@ -96,7 +101,7 @@ function VideoPreviewScreen() {
                                         setSelectedClip(clip)
                                         setVideoTime(clip.options.start_at)
                                     }}
-                                    onEdit={onClipClick}
+                                    onEdit={() => { onClipClick(clip.id) }}
                                     onDelete={() => { deleteClip(clip.id) }}
                                 />
                             )
@@ -104,12 +109,17 @@ function VideoPreviewScreen() {
                         }
                     </Stack>
                 </Grid2>
-                <Grid2 size={8}>
-                    {video != null ?
-                        (<VideoEditor videoTime={currentVideoTime}
-                            video={video} selectedClip={selectedClip} clipList={clipList} />) : <></>
-                    }
-
+                <Grid2 size={6}>
+                    <Stack pt='10%' height='80vh'bgcolor={colors.grey[200]} sx={{ overflowY: 'hidden' }}>
+                        {video != null ?
+                            (<VideoEditor videoTime={currentVideoTime}
+                                video={video} selectedClip={selectedClip} clipList={clipList} />) : <></>
+                        }
+                        <Box width={'100%'} height={'50vh'}></Box>
+                    </Stack>
+                </Grid2>
+                <Grid2 size={3}>
+                    <VideoTranscript video={video} onItemClick={(timingS) => { onSelectTiming(timingS) }} />
                 </Grid2>
             </Grid2>
         </Stack>
