@@ -66,7 +66,7 @@ function ClipEditorScreen() {
                     <Stack p={4} bgcolor={colors.grey[200]} justifyContent={'center'}
                     alignItems={'center'}>
                         {
-                            video != null ? (<MediaPlayer
+                            video != null && clip != null ? (<MediaPlayer
                             style={{
                                 maxWidth: "24vw"
                             }}
