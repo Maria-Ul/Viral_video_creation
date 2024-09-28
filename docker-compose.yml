@@ -1,16 +1,16 @@
 version: "3.8"
 
 services:
-  # frontend:
-  #   container_name: frontend
-  #   build:
-  #     context: ./
-  #     dockerfile: ./build_env/frontend/Dockerfile
-  #   restart: always
-  #   ports:
-  #     - 80:80
-  #   depends_on:
-  #     - backend
+  frontend:
+    container_name: frontend
+    build:
+      context: ./
+      dockerfile: ./build_env/frontend/Dockerfile
+    restart: always
+    ports:
+      - 80:80
+    depends_on:
+      - backend
 
   backend:
     container_name: backend

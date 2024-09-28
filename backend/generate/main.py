@@ -20,6 +20,7 @@ def main():
     channel.queue_declare(queue='generate')
 
     def callback(ch, method, properties, body):
+        print(body)
         body = json.loads(body)
         object_name = body["object_name"]
         
