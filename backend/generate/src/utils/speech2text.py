@@ -18,7 +18,7 @@ class Speech2TextConverter:
             file.write(str(segment['text'].strip()+'\n'))
             file.write('\n')
 
-    def get_df_transcript(self, output_path):
+    def save_df_transcript(self, output_path):
         df = pd.DataFrame(self.result)
         df = df[['id', 'start', 'end', 'text']]
         df.to_csv(output_path)

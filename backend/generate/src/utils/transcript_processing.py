@@ -49,3 +49,10 @@ class TranscriptClassifier:
         charged_emotions = ['anger', 'joy', 'sadness', 'fear']
         combined_df['emotionally_charged'] = combined_df['emotion'].apply(lambda x: x in charged_emotions)
         self.data = self.data.merge(combined_df[['group_id', 'emotion', 'emotion_confidence']], on='group_id', how='left')
+
+class TranscriptProcesser:
+    def __init__(self, transcription_file):
+        self.transcription_file = transcription_file
+        video_file = '/content/movie2.mp4'
+        audio_file = "audio.wav"
+
