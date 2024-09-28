@@ -146,11 +146,11 @@ paths:
       responses:
         '200':
           description: Video Removed
-  /video/{object_name}:
+  /files/{object_name}:
     get:
       tags:
-        - "Video"
-      summary: Get video from history
+        - "Files"
+      summary: Get file from history
       parameters:
         - in: path
           name: object_name
@@ -162,7 +162,7 @@ paths:
         - bearerAuth: []
       responses:
         '200':
-          description: Video
+          description: File
   /video/{id}:
     delete:
       tags:
@@ -208,6 +208,23 @@ paths:
                     object_name:
                       type: string
                       description: Clip
+  /clip/{id}:
+    delete:
+      tags:
+        - "Clip"
+      summary: Remove Clip from history
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: id
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Clip Removed
 components:
   securitySchemes:
     bearerAuth:

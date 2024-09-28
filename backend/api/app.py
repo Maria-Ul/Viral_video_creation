@@ -12,6 +12,10 @@ from minio import Minio
 import sys
 import io
 import uuid
+import moviepy.editor as mp
+import tempfile
+
+
 
 app = Flask(__name__)
 CORS(app)
@@ -128,18 +132,67 @@ def generate(current_user):
         return "No file part", 400
 
     file = request.files["video"]
-    object_name = uuid.uuid4()
+    object_name = str(uuid.uuid4()) + '.' + file.filename.split('.')[-1]
+    length = len(file.stream.read())
+    file.stream.seek(0)
     client.put_object(
         bucket_name=bucket,
         object_name=object_name,
         data=file.stream,
-        length=len(file.stream.read()),
+        length=length, # Можно убрать, если используется length=None
         content_type=file.content_type,
     )
-
-    video = Video(user_id=current_user.id, status=STATUS_CREATED, object_name=object_name)
+    video = Video(user_id=current_user.id, status=STATUS_CREATED, object_name=object_name, options={})
     db.session.add(video)
     db.session.commit()
+
+    # Загрузка видео с S3
+    video_data = client.get_object(bucket_name=bucket, object_name=object_name).data
+    video_stream = io.BytesIO(video_data)
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_file:
+        temp_file.write(video_stream.getvalue())
+        temp_file.flush()
+
+        # Создаем VideoFileClip
+        videoTemp = mp.VideoFileClip(temp_file.name)
+        # Создание клипов
+        clips = []
+        start_time = 0
+        while start_time + 5 < videoTemp.duration:  # Нарезаем по 5 секунд
+            clip = videoTemp.subclip(start_time, start_time + 5)  # Можно изменить длину клипа
+            clips.append(clip)
+            start_time += 5
+
+        for i, clip in enumerate(clips):
+            clip_object_name = str(uuid.uuid4()) + '.mp4'
+
+            # Создаем временный файл
+            clip.write_videofile(temp_file.name, codec="libx264")
+            temp_file.flush()
+
+            # Открываем временный файл для чтения
+            with open(temp_file.name, "rb") as f:
+                clip_stream = f.read()
+
+                # Создаем BytesIO объект
+                clip_stream = io.BytesIO(clip_stream)
+
+                # Загружаем клип в S3
+                client.put_object(
+                    bucket_name=bucket,
+                    object_name=clip_object_name,
+                    data=clip_stream,
+                    length=len(clip_stream.getbuffer()),  #  Можно использовать len(clip_stream)
+                    content_type="video/mp4",
+                )
+
+
+                clip = Clip(video_id=video.id, object_name=clip_object_name, options={})
+                db.session.add(clip)
+                db.session.commit()
+
+
+
             
     body = {}
     body['id'] = video.id
@@ -170,7 +223,9 @@ def videos(current_user):
 @token_required
 def clips(current_user):
     video_id = request.args.get('video_id')
-    history = Clip.query.filter(Clip.video_id == video_id).order_by(Clip.id.desc()).all()
+    
+    # history = Clip.query.all()
+    history = Clip.query.filter(Clip.video_id == int(video_id)).order_by(Clip.id.desc()).all()
 
     return jsonify([i.serialize for i in history]), 200
 
@@ -184,20 +239,31 @@ def getFile(object_name):
         # Создаем BytesIO объект для хранения файла
         file_stream = io.BytesIO(response.data)
 
+        # Получаем MIME-тип из заголовков
+        content_type = response.headers['Content-Type']
+
         # Отправляем файл в ответ на HTTP-запрос
-        return send_file(file_stream, mimetype=response.content_type)
+        return send_file(file_stream, mimetype=content_type)
     except Exception as e:
         # Обработка ошибок
         return 'Ошибка при получении файла: {}'.format(e), 500
 
 @app.route('/video/<id>', methods=['DELETE'])
 @token_required
-def removeImage(current_user, id):
+def removeVideo(current_user, id):
     assert id == request.view_args['id']
     history = Video.query.filter(Video.id == id).first()
     if STATUS_DONE == history.status:
         client.remove_object(bucket_name=bucket, object_name=history.object_name)
     Video.query.filter(Video.id == id).delete()
+    db.session.commit()
+    return jsonify({}), 200
+
+@app.route('/clip/<id>', methods=['DELETE'])
+@token_required
+def removeClip(current_user, id):
+    assert id == request.view_args['id']
+    Clip.query.filter(Clip.id == id).delete()
     db.session.commit()
     return jsonify({}), 200
 
