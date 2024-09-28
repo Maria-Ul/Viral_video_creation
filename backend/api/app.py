@@ -146,7 +146,7 @@ def generate(current_user):
     db.session.add(video)
     db.session.commit()
 
-    # Загрузка видео с S3
+    # Создание клипов
     video_data = client.get_object(bucket_name=bucket, object_name=object_name).data
     video_stream = io.BytesIO(video_data)
     with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_file:
@@ -155,7 +155,6 @@ def generate(current_user):
 
         # Создаем VideoFileClip
         videoTemp = mp.VideoFileClip(temp_file.name)
-        # Создание клипов
         clips = []
         start_time = 0
         while start_time + 5 < videoTemp.duration:  # Нарезаем по 5 секунд
