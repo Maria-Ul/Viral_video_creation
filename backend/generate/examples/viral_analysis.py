@@ -53,6 +53,50 @@ def segment_and_save_videos(video_path, audio_path, time_segments, output_dir):
     audio_clip = AudioFileClip(audio_path)
 
     video_clips = []
+    i=0
+    # current_clip = None
+    # new_time_segments = []
+    # for start_time, end_time, text in time_segments:
+    #     i += 1
+
+    #     # Создание субклипа для текущего сегмента
+    #     v_subclip = video_clip.subclip(start_time, end_time)
+    #     audio_file_path = os.path.join(output_dir, f"audio{str(i).zfill(3)}.wav")
+    #     v_subclip.audio.write_audiofile(audio_file_path)
+
+
+    #     # Если это первый клип или если разрыв меньше 5 секунд, объединяем
+    #     if current_clip is None:
+    #         current_clip = v_subclip
+    #         current_start = start_time
+    #         current_end = end_time
+    #     else:
+    #         time_gap = start_time - current_clip.end  # Вычисляем разрыв времени
+    #         if time_gap < 5:  # Проверяем, меньше ли разрыв 5 секунд
+    #             # Объединяем клипы
+    #             current_clip = concatenate_videoclips([current_clip, v_subclip])
+    #             audio_file_path = os.path.join(output_dir, f"audio{str(i).zfill(3)}.wav")
+    #             current_clip.audio.write_audiofile(audio_file_path)
+    #         else:
+    #             # Обрабатываем текущий объединённый клип
+    #             audio_file_path = os.path.join(output_dir, f"audio{str(i).zfill(3)}.wav")
+    #             current_clip.audio.write_audiofile(audio_file_path)
+
+    #             # Устанавливаем аудиотрек и записываем файл
+    #             output_file = os.path.join(output_dir, f"output{str(i).zfill(3)}.mp4")
+    #             current_clip.write_videofile(output_file, codec="libx264", audio_codec="aac")
+
+    #             # Начинаем новый клип
+    #             current_clip = v_subclip
+
+    # # После цикла обрабатываем оставшийся клип, если он есть
+    # if current_clip is not None:
+    #     audio_file_path = os.path.join(output_dir, f"audio{str(i).zfill(3)}.wav")
+    #     current_clip.audio.write_audiofile(audio_file_path)
+
+    #     # Устанавливаем аудиотрек и записываем файл
+    #     output_file = os.path.join(output_dir, f"output{str(i).zfill(3)}.mp4")
+    #     current_clip.write_videofile(output_file, codec="libx264", audio_codec="aac")
     # audio_clips = []
     i = 0
     prev_end = 0
