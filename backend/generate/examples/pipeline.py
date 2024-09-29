@@ -99,11 +99,12 @@ def generate(video_file, body):
             segment_options.append({'start': start_time, 'end': end_time, 'text': text})
 
         video = db.query(Video).filter(Video.id == body["id"]).first()  # Используйте db.query вместо Video.query
-        if video:
-            video.options['segments'] = segment_options  # Обновляем опции
-            db.add(video)
-            db.commit()
+        video.options['segments'] = segment_options  # Обновляем опции
+        print(segment_options)
+        db.add(video)
+        db.commit()
 
+    with SessionLocal() as db:
         # Рекурсивный обход папок
         for root, _, files in os.walk(output_directory):
             for file in files:
@@ -132,6 +133,6 @@ def generate(video_file, body):
 
     with SessionLocal() as db:
         video = db.query(Video).filter(Video.id == body["id"]).first()  # Используйте db.query вместо Video.query
-        video.status = STATUS_IN_PROGRESS  # Обновляем опции
+        video.status = STATUS_DONE  # Обновляем опции
         db.add(video)
         db.commit()
