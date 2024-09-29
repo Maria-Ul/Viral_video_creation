@@ -39,10 +39,12 @@ def get_key_segments(frame, transcript_text):
           if phrase in row['text']:
             key_segments.append(row)
     print('key_segments ', key_segments)
-    sorted_segments = sorted([(row['start'], row['end'], row['text']) for row in set(key_segments)], key=lambda x: x[0])
-    # sorted_unique_segments = set(sorted_segments)
-    return sorted_segments
-
+    unique_seg = set([(row['start'], row['end'], row['text']) for row in key_segments])
+    # sorted_segments = sorted(unique_seg, key=lambda x: x[0])
+    sorted_unique_segments = sorted(unique_seg, key=t)
+    return sorted_unique_segments
+def t(a):
+    return a[0]
 #analyzemotions?
 
 def segment_and_save_videos(video_path, audio_path, time_segments, output_dir):
@@ -53,8 +55,10 @@ def segment_and_save_videos(video_path, audio_path, time_segments, output_dir):
     video_clips = []
     # audio_clips = []
     i = 0
+    prev_end = 0
     for start_time, end_time, text in (time_segments):
         i+=1
+           
         # au_subclip = audio_clip.subclip(start_time, end_time)
         v_subclip = video_clip.subclip(start_time, end_time)
 
