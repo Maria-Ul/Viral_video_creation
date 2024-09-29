@@ -127,7 +127,13 @@ def generate(video_file, body):
                     clip = Clip(
                         video_id=body['id'],
                         object_name=object_name,
-                        options={'name': object_name, 'desc': 'desc', 'start_at': 'start_at', 'end_at': 'end_at', 'tags': ['tag1', 'tag2']}
+                        options={
+                            'name': object_name,
+                            'desc': 'desc',
+                            'start_at': 'start_at',
+                            'end_at': 'end_at',
+                            'tags': ['tag1', 'tag2']
+                            }
                     )
                     db.add(clip)
                     db.commit()
