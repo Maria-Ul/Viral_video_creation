@@ -95,7 +95,7 @@ def generate(video_file, body):
     # Сохранение информации о видео в базу данных
     with SessionLocal() as db:
         segment_options = []
-        sorted_segments = sorted([(row['start'], row['end'], row['text']) for row in set(key_time_segments)], key=lambda x: x[0])
+        sorted_segments = sorted(set([(row['start'], row['end'], row['text']) for row in key_time_segments]), key=lambda x: x[0])
         for start_time, end_time, text in sorted_segments:  # Исправьте здесь на правильные переменные
             segment_options.append({'start': start_time, 'end': end_time, 'text': text})
 
