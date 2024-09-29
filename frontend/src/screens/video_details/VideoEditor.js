@@ -54,7 +54,7 @@ export const VideoEditor = (
                                 <>
                                     {
                                         clipList.map((clip) => {
-                                            console.log((clip.options.end_at - clip.options.start_at) / video.durationS * 100)
+                                            console.log("%%" + ((clip.options.end_at - clip.options.start_at) / video.options.duration * 100).toString())
                                             return (
                                                 <Box sx={{
                                                     bgcolor: colors.blue[800],
@@ -62,9 +62,9 @@ export const VideoEditor = (
                                                     height: 30,
                                                     borderRadius: '0 8px 8px 8px',
                                                     //border: 'white solid 1px',
-                                                    width: `${(clip.options.end_at - clip.options.start_at) / video.durationS * 100}%`,
+                                                    width: `${(clip.options.end_at - clip.options.start_at) / video.options.duration * 100}%`,
                                                     top: 8,
-                                                    left: `${clip.options.start_at / video.durationS * 100 + 1.5}%`,
+                                                    left: `${clip.options.start_at / video.options.duration * 100 + 1.5}%`,
                                                 }}></Box>
                                             )
                                         }
@@ -73,14 +73,14 @@ export const VideoEditor = (
                                     }
                                     {
                                         clipList.map((clip) => {
-                                            console.log((clip.endTime - clip.startTime) / video.durationS * 100)
+                                            console.log((clip.options.end_at - clip.options.start_at) / video.options.duration * 100)
                                             return (
                                                 <HtmlTooltip
                                                 placement="top"
                                                     title={
                                                         <React.Fragment>
-                                                            <Typography variant='h5'>{clip.name}</Typography>
-                                                            <Typography>{`${clip.startTime}-${clip.endTime}`}</Typography>
+                                                            <Typography variant='h5'>{clip.options.name}</Typography>
+                                                            <Typography>{`${clip.options.start_at}-${clip.options.end_at}`}</Typography>
                                                         </React.Fragment>
                                                     }
                                                 >
@@ -89,12 +89,12 @@ export const VideoEditor = (
                                                         position: 'absolute',
                                                         //border: 'white solid 1px',
                                                         borderRadius: '8px 8px 0px 0px',
-                                                        left: `${clip.startTime / video.durationS * 100 + 1.5}%`,
+                                                        left: `${clip.options.start_at / video.options.duration * 100 + 1.5}%`,
                                                         mt: -6,
                                                         p: 0.2,
                                                         pl: 0.5,
                                                         pr: 0.5,
-                                                    }}><Typography>{clip.name}</Typography></Stack>
+                                                    }}></Stack>
                                                 </HtmlTooltip>
 
                                             )
