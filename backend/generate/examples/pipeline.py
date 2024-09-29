@@ -94,13 +94,20 @@ def generate(video_file, body):
     print('key_time_segments: ', key_time_segments, '\n')
     segment_and_save_videos(video_file, audio_file, key_time_segments, output_directory)
 
-    i = 0
     # Сохранение информации о видео в базу данных
     with SessionLocal() as db:
+<<<<<<< HEAD
         i = i+1
+=======
+
+        i = 0
+        print('segment_options', segment_options)
+>>>>>>> 9ceaf6e8ac15f210cf59428d87aecd6f3fd07918
         segment_options = []
         # sorted_segments = sorted([(row['start'], row['end'], row['text']) for row in key_time_segments], key=lambda x: x[0])
         for start_time, end_time, text in key_time_segments:  # Исправьте здесь на правильные переменные
+            
+            i = i+1
             segment_options.append({'start': start_time, 'end': end_time, 'text': text})
 
         video = db.query(Video).filter(Video.id == body["id"]).first()  # Используйте db.query вместо Video.query
@@ -110,9 +117,8 @@ def generate(video_file, body):
         db.add(video)
         db.commit()
 
-    print("segements:", i)
-    i = 0
-    with SessionLocal() as db:
+        print("segements:", i)
+        i = 0
         # Рекурсивный обход папок
         for root, _, files in os.walk(output_directory):
             for file in files:
@@ -146,8 +152,7 @@ def generate(video_file, body):
                     db.add(clip)
                     db.commit()
 
-    print("clipsL:", i)
-    with SessionLocal() as db:
+        print("clipsL:", i)
         video = db.query(Video).filter(Video.id == body["id"]).first()  # Используйте db.query вместо Video.query
         video.status = STATUS_DONE  # Обновляем опции
         db.add(video)
