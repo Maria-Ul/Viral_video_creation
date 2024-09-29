@@ -52,71 +52,27 @@ def segment_and_save_videos(video_path, audio_path, time_segments, output_dir):
     video_clip.audio.write_audiofile(audio_path)
     audio_clip = AudioFileClip(audio_path)
 
-
+    video_clips = []
+    # audio_clips = []
     i = 0
-
-    # Инициализация переменных для объединения
-    current_clip = None
-
-    for start_time, end_time, text in time_segments:
-        i += 1
-
-        # Создание субклипа для текущего сегмента
+    prev_end = 0
+    for start_time, end_time, text in (time_segments):
+        i+=1
+           
+        # au_subclip = audio_clip.subclip(start_time, end_time)
         v_subclip = video_clip.subclip(start_time, end_time)
 
-        # Если это первый клип или если разрыв меньше 5 секунд, объединяем
-        if current_clip is None:
-            current_clip = v_subclip
-        else:
-            time_gap = start_time - current_clip.end  # Вычисляем разрыв времени
-            if time_gap < 5:  # Проверяем, меньше ли разрыв 5 секунд
-                # Объединяем клипы
-                current_clip = concatenate_videoclips([current_clip, v_subclip])
-            else:
-                # Обрабатываем текущий объединённый клип
-                audio_file_path = os.path.join(output_dir, f"audio{str(i).zfill(3)}.wav")
-                current_clip.audio.write_audiofile(audio_file_path)
-                au_subclip = AudioFileClip(audio_file_path)
-
-                # Устанавливаем аудиотрек и записываем файл
-                current_clip = current_clip.set_audio(au_subclip)
-                output_file = os.path.join(output_dir, f"output{str(i).zfill(3)}.mp4")
-                current_clip.write_videofile(output_file, codec="libx264", audio_codec="aac")
-
-                # Начинаем новый клип
-                current_clip = v_subclip
-
-    # После цикла обрабатываем оставшийся клип, если он есть
-    if current_clip is not None:
+        # Создать аудиофайл для каждого сегмента
         audio_file_path = os.path.join(output_dir, f"audio{str(i).zfill(3)}.wav")
-        current_clip.audio.write_audiofile(audio_file_path)
-        au_subclip = AudioFileClip(audio_file_path)
+        v_subclip.audio.write_audiofile(audio_file_path)
+        au_subclip = AudioFileClip(audio_file_path) 
 
-        # Устанавливаем аудиотрек и записываем файл
-        current_clip = current_clip.set_audio(au_subclip)
+        v_subclip = v_subclip.set_audio(au_subclip)
+
         output_file = os.path.join(output_dir, f"output{str(i).zfill(3)}.mp4")
-        current_clip.write_videofile(output_file, codec="libx264", audio_codec="aac")
-    # video_clips = []
-    # # audio_clips = []
-    # i = 0
-    # prev_end = 0
-    # for start_time, end_time, text in (time_segments):
-    #     i+=1
-           
-    #     # au_subclip = audio_clip.subclip(start_time, end_time)
-    #     v_subclip = video_clip.subclip(start_time, end_time)
+        v_subclip.write_videofile(output_file, codec="libx264", audio_codec="aac")
 
-    #     # Создать аудиофайл для каждого сегмента
-    #     audio_file_path = os.path.join(output_dir, f"audio{str(i).zfill(3)}.wav")
-    #     v_subclip.audio.write_audiofile(audio_file_path)
-    #     au_subclip = AudioFileClip(audio_file_path) 
-
-    #     v_subclip = v_subclip.set_audio(au_subclip)
-
-    #     output_file = os.path.join(output_dir, f"output{str(i).zfill(3)}.mp4")
-    #     v_subclip.write_videofile(output_file, codec="libx264", audio_codec="aac")
-
-    #     video_clips.append(v_subclip)  # Add the video with audio
+        video_clips.append(v_subclip)  # Add the video with audio
 
 
     # final_clip = concatenate_videoclips(video_clips)
