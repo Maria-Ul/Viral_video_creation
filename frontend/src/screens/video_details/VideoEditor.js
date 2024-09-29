@@ -31,7 +31,7 @@ export const VideoEditor = (
 ) => {
     const navigate = useNavigate()
     const onClipClick = (clip) => {
-        navigate(`/editor/${clip.id}`)
+        navigate(`/editor/${video.id}/${clip.id}`)
     } 
     return (
         <Stack p={4} bgcolor={colors.grey[200]}>
@@ -62,9 +62,9 @@ export const VideoEditor = (
                                                     height: 30,
                                                     borderRadius: '0 8px 8px 8px',
                                                     //border: 'white solid 1px',
-                                                    width: `${(clip.options.end_at - clip.options.start_at) / video.options.duration * 100}%`,
+                                                    width: `${(clip.options.end_at - clip.options.start_at) / video.options.duration * 100 }%`,
                                                     top: 8,
-                                                    left: `${clip.options.start_at / video.options.duration * 100 + 1.5}%`,
+                                                    left: `${clip.options.start_at / video.options.duration * 100 + 2}%`,
                                                 }}></Box>
                                             )
                                         }
@@ -84,12 +84,12 @@ export const VideoEditor = (
                                                         </React.Fragment>
                                                     }
                                                 >
-                                                    <Stack onClick={onClipClick} sx={{
+                                                    <Stack onClick={()=>{onClipClick(clip)}} sx={{
                                                         bgcolor: colors.blue[800],
                                                         position: 'absolute',
                                                         //border: 'white solid 1px',
                                                         borderRadius: '8px 8px 0px 0px',
-                                                        left: `${clip.options.start_at / video.options.duration * 100 + 1.5}%`,
+                                                        left: `${clip.options.start_at / video.options.duration * 100 + 2}%`,
                                                         mt: -6,
                                                         p: 0.2,
                                                         pl: 0.5,
