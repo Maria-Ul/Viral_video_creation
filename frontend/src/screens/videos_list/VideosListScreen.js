@@ -40,14 +40,16 @@ const VideoListScreen = () => {
             }
         })
     }
+    const token = sessionStorage.getItem(SESSION_TOKEN)
+    const navigate = useNavigate();
     useEffect(() => {
-        if (sessionStorage.getItem(SESSION_TOKEN) == null) {
+        if (token == null || token == '') {
             navigate('/auth')
         } else {
             refreshList()
         }
     }, [])
-    const navigate = useNavigate();
+
     const onVideoClick = (video) => {
         navigate(`/preview/${video.id}`);
     }
@@ -114,7 +116,7 @@ const VideoListScreen = () => {
                 )
                 )}
             </Grid2>
-            <DownloadModal open={open} handleOpen={handleOpen} handleClose={handleClose} onLoad={refreshList()} />
+            <DownloadModal open={open} handleOpen={handleOpen} handleClose={handleClose} onLoad={refreshList} />
         </Stack>
     );
 }
