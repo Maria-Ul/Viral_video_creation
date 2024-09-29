@@ -68,6 +68,8 @@ class Clip(Base):
 
     def __repr__(self):
         return '<Clip %r>' % self.id
+def t(a):
+    return a[0]
 
 def generate(video_file, body):
     with SessionLocal() as db:
@@ -94,19 +96,25 @@ def generate(video_file, body):
 
     # Сохранение информации о видео в базу данных
     with SessionLocal() as db:
+
+        i = 0
+        print('segment_options', segment_options)
         segment_options = []
-        sorted_segments = sorted(set([(row['start'], row['end'], row['text']) for row in key_time_segments]), key=lambda x: x[0])
-        for start_time, end_time, text in sorted_segments:  # Исправьте здесь на правильные переменные
+        # sorted_segments = sorted([(row['start'], row['end'], row['text']) for row in key_time_segments], key=lambda x: x[0])
+        for start_time, end_time, text in key_time_segments:  # Исправьте здесь на правильные переменные
+            
+            i = i+1
             segment_options.append({'start': start_time, 'end': end_time, 'text': text})
 
         video = db.query(Video).filter(Video.id == body["id"]).first()  # Используйте db.query вместо Video.query
         video.options['segments'] = segment_options  # Обновляем опции
-        print('key_time_segments 1111:', sorted_segments)
+        print('key_time_segments 1111:', key_time_segments)
         print('segment_options:', segment_options)
         db.add(video)
         db.commit()
 
-    with SessionLocal() as db:
+        print("segements:", i)
+        i = 0
         # Рекурсивный обход папок
         for root, _, files in os.walk(output_directory):
             for file in files:
@@ -124,6 +132,7 @@ def generate(video_file, body):
                             content_type="video/mp4",
                         )
 
+                    i=i+1
                     # Сохранение в БД
                     clip = Clip(
                         video_id=body['id'],
@@ -139,7 +148,7 @@ def generate(video_file, body):
                     db.add(clip)
                     db.commit()
 
-    with SessionLocal() as db:
+        print("clipsL:", i)
         video = db.query(Video).filter(Video.id == body["id"]).first()  # Используйте db.query вместо Video.query
         video.status = STATUS_DONE  # Обновляем опции
         db.add(video)
