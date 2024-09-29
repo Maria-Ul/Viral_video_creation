@@ -95,12 +95,13 @@ def generate(video_file, body):
     # Сохранение информации о видео в базу данных
     with SessionLocal() as db:
         segment_options = []
-        for start_time, end_time, text in set(key_time_segments):  # Исправьте здесь на правильные переменные
+        sorted_segments = sorted([(row['start'], row['end'], row['text']) for row in set(key_time_segments)], key=lambda x: x[0])
+        for start_time, end_time, text in sorted_segments:  # Исправьте здесь на правильные переменные
             segment_options.append({'start': start_time, 'end': end_time, 'text': text})
 
         video = db.query(Video).filter(Video.id == body["id"]).first()  # Используйте db.query вместо Video.query
         video.options['segments'] = segment_options  # Обновляем опции
-        print('key_time_segments 1111:', key_time_segments)
+        print('key_time_segments 1111:', sorted_segments)
         print('segment_options:', segment_options)
         db.add(video)
         db.commit()
