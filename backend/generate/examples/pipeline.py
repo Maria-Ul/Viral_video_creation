@@ -117,7 +117,7 @@ def generate(video_file, body):
         db.commit()
 
         print("segements:", i)
-        i = -1
+
         # Рекурсивный обход папок
         # for root, _, files in os.walk(output_directory):
         for i in range(len(segment_options)):
