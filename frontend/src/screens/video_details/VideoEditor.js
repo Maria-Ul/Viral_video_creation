@@ -38,7 +38,6 @@ export const VideoEditor = (
             <MediaPlayer
                 title="Sprite Fight"
                 src={getVideoLink(video)}
-                autoplay
                 currentTime={videoTime}
             >
                 <MediaProvider />

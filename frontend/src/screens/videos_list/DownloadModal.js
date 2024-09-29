@@ -1,4 +1,4 @@
-import { Box, Button, Modal, Stack, Typography } from "@mui/material";
+import { Box, Button, colors, Modal, Stack, Typography } from "@mui/material";
 import { FilePond, registerPlugin } from 'react-filepond'
 
 // Import FilePond styles
@@ -48,6 +48,7 @@ export const DownloadModal = ({ open, handleOpen, handleClose, onLoad }) => {
                             name="video" /* sets the file input name, it's filepond by default */
                             labelIdle='Перетащите или <span class="filepond--label-action">Выберете файл</span>'
                         />
+                        <Typography variant='subtitle1' color={colors.grey[600]}>После загрузки клипы и транскрипт появятся через несколько минут (~0.1 длины видео)</Typography>
                         <Button mt={10} onClick={handleClose}>Закрыть</Button>
                     </Stack>
                 </Box>
