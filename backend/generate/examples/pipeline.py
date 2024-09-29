@@ -98,7 +98,7 @@ def generate(video_file, body):
     with SessionLocal() as db:
 
         i = 0
-        print('segment_options', segment_options)
+        
         segment_options = []
         # sorted_segments = sorted([(row['start'], row['end'], row['text']) for row in key_time_segments], key=lambda x: x[0])
         for start_time, end_time, text in key_time_segments:  # Исправьте здесь на правильные переменные
@@ -110,6 +110,7 @@ def generate(video_file, body):
         video.options['segments'] = segment_options  # Обновляем опции
         print('key_time_segments 1111:', key_time_segments)
         print('segment_options:', segment_options)
+        print('segment_options', segment_options)
         db.add(video)
         db.commit()
 
