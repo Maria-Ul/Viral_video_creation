@@ -46,7 +46,7 @@ export const DownloadModal = ({ open, handleOpen, handleClose, onLoad }) => {
                             }
                             }
                             name="video" /* sets the file input name, it's filepond by default */
-                            labelIdle='Перетащите или <span class="filepond--label-action">Выберете файл</span>'
+                            labelIdle='Перетащите или <span class="filepond--label-action">Выберите файл</span>'
                         />
                         <Typography variant='subtitle1' color={colors.grey[600]}>После загрузки клипы и транскрипт появятся через несколько минут (~0.1 от длины видео). Чтобы увидеть актуальный статус обработки видео - обновите страницу.</Typography>
                         <Button mt={10} onClick={handleClose}>Закрыть</Button>
