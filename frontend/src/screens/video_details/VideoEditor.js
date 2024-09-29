@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import { BACKEND_URL, FILE_ACCESS_LINK } from '../../api/baseApi';
 
 export const getVideoLink =  (video) => { return BACKEND_URL + FILE_ACCESS_LINK + `/${video.object_name}` }
+export const getVideoPreview = (video) => { return BACKEND_URL + FILE_ACCESS_LINK + `/${video.options.preview}` }
 
 const HtmlTooltip = styled(({ className, ...props }) => (
     <Tooltip {...props} classes={{ popper: className }} />

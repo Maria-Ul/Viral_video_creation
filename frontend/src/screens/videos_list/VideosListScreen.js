@@ -81,6 +81,8 @@ const VideoListScreen = () => {
                             onClick={handleOpen}>Загрузить видео</Button>
                         <Button color='white' variant='outlined' onClick={() => {
                             navigate('/auth')
+                            sessionStorage.setItem(SESSION_TOKEN, null)
+                            sessionStorage.setItem(CURRENT_LOGIN, null)
                         }
                         } >Выйти</Button>
                     </Stack>
