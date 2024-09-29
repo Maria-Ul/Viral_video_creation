@@ -70,6 +70,11 @@ class Clip(Base):
         return '<Clip %r>' % self.id
 
 def generate(video_file, body):
+    with SessionLocal() as db:
+        video = db.query(Video).filter(Video.id == body["id"]).first()  # Используйте db.query вместо Video.query
+        video.status = STATUS_IN_PROGRESS  # Обновляем опции
+        db.add(video)
+        db.commit()
     audio_file = "audio.wav"
     output_directory = 'data/processed'
     transcript_file = os.path.join(output_directory,'transcript.csv')
@@ -90,15 +95,18 @@ def generate(video_file, body):
     # Сохранение информации о видео в базу данных
     with SessionLocal() as db:
         segment_options = []
-        for start_time, end_time in key_time_segments:  # Исправьте здесь на правильные переменные
+        sorted_segments = sorted(set([(row['start'], row['end'], row['text']) for row in key_time_segments]), key=lambda x: x[0])
+        for start_time, end_time, text in sorted_segments:  # Исправьте здесь на правильные переменные
             segment_options.append({'start': start_time, 'end': end_time, 'text': text})
 
         video = db.query(Video).filter(Video.id == body["id"]).first()  # Используйте db.query вместо Video.query
-        if video:
-            video.options['segments'] = segment_options  # Обновляем опции
-            db.add(video)
-            db.commit()
+        video.options['segments'] = segment_options  # Обновляем опции
+        print('key_time_segments 1111:', sorted_segments)
+        print('segment_options:', segment_options)
+        db.add(video)
+        db.commit()
 
+    with SessionLocal() as db:
         # Рекурсивный обход папок
         for root, _, files in os.walk(output_directory):
             for file in files:
@@ -120,7 +128,19 @@ def generate(video_file, body):
                     clip = Clip(
                         video_id=body['id'],
                         object_name=object_name,
-                        options={'name': object_name, 'desc': 'desc', 'start_at': 'start_at', 'end_at': 'end_at', 'tags': ['tag1', 'tag2']}
+                        options={
+                            'name': object_name,
+                            'desc': 'desc',
+                            'start_at': 'start_at',
+                            'end_at': 'end_at',
+                            'tags': ['tag1', 'tag2']
+                            }
                     )
                     db.add(clip)
                     db.commit()
+
+    with SessionLocal() as db:
+        video = db.query(Video).filter(Video.id == body["id"]).first()  # Используйте db.query вместо Video.query
+        video.status = STATUS_DONE  # Обновляем опции
+        db.add(video)
+        db.commit()
