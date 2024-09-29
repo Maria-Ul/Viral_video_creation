@@ -1,4 +1,4 @@
-from examples.viral_analysis import read_transcript, get_key_segments, segment_and_save_videos
+from examples.viral_analysis import read_transcript, get_key_segments, segment_and_save_videos, process_seg
 from src.utils.speech2text import Speech2TextConverter
 import os
 from sqlalchemy import create_engine
@@ -92,6 +92,8 @@ def generate(video_file, body):
     key_time_segments = get_key_segments(df, text)
     output_file_path = os.path.join(output_directory,"final_video_with_audio.mp4")
     print('key_time_segments: ', key_time_segments, '\n')
+    key_time_segments = process_seg(key_time_segments)
+    print('key_time_segments: ', key_time_segments, '\n')
     segment_and_save_videos(video_file, audio_file, key_time_segments, output_directory)
 
     # Сохранение информации о видео в базу данных
@@ -110,45 +112,46 @@ def generate(video_file, body):
         video.options['segments'] = segment_options  # Обновляем опции
         print('key_time_segments 1111:', key_time_segments)
         print('segment_options:', segment_options)
-        print('segment_options', segment_options)
+
         db.add(video)
         db.commit()
 
         print("segements:", i)
         i = -1
         # Рекурсивный обход папок
-        for root, _, files in os.walk(output_directory):
-            for file in files:
-                if file.endswith(".mp4"):  # Проверка, что файл - видео
-                    file_path = os.path.join(root, file)
-                    object_name = os.path.relpath(file_path, output_directory)  # Получение относительного пути
+        # for root, _, files in os.walk(output_directory):
+        for i in range(len(segment_options)):
+            file_path = os.path.join(output_directory, f"output{str(i+1).zfill(3)}.mp4")    
+            # for file in files:
+            #     if file.endswith(".mp4"):  # Проверка, что файл - видео
+            #         file_path = os.path.join(root, file)
+            object_name = os.path.relpath(file_path, output_directory)  # Получение относительного пути
 
-                    # Загрузка в S3
-                    with open(file_path, "rb") as f:
-                        client.put_object(
-                            bucket_name=bucket,
-                            object_name=object_name,
-                            data=f,
-                            length=os.path.getsize(file_path),
-                            content_type="video/mp4",
-                        )
+            # Загрузка в S3
+            with open(file_path, "rb") as f:
+                client.put_object(
+                    bucket_name=bucket,
+                    object_name=object_name,
+                    data=f,
+                    length=os.path.getsize(file_path),
+                    content_type="video/mp4",
+                )
 
-                    i=i+1
-                    
-                    # Сохранение в БД
-                    clip = Clip(
-                        video_id=body['id'],
-                        object_name=object_name,
-                        options={
-                            'name': object_name,
-                            'desc': segment_options[i]['text'],
-                            'start_at': segment_options[i]['start'],
-                            'end_at': segment_options[i]['end'],
-                            'tags': ['tag1', 'tag2']
-                            }
-                    )
-                    db.add(clip)
-                    db.commit()
+        
+            # Сохранение в БД
+            clip = Clip(
+                video_id=body['id'],
+                object_name=object_name,
+                options={
+                    'name': object_name,
+                    'desc': segment_options[i]['text'],
+                    'start_at': segment_options[i]['start'],
+                    'end_at': segment_options[i]['end'],
+                    'tags': ['tag1', 'tag2']
+                    }
+            )
+            db.add(clip)
+            db.commit()
 
         print("clipsL:", i)
         video = db.query(Video).filter(Video.id == body["id"]).first()  # Используйте db.query вместо Video.query

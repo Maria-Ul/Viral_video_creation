@@ -47,57 +47,38 @@ def t(a):
     return a[0]
 #analyzemotions?
 
+def process_seg(time_segments):
+    if not time_segments:
+        return []
+
+    # Список для хранения объединённых сегментов
+    merged_segments = []
+    
+    # Инициализация первого сегмента
+    current_start_time, current_end_time, current_text = time_segments[0]
+    if len(time_segments)>1:
+        for start_time, end_time, text in time_segments[1:]:
+            # Проверяем, нужно ли объединять сегменты
+            if start_time - current_end_time < 5:
+                # Объединяем тексты и обновляем время окончания
+                current_end_time = end_time
+                current_text += ' ' + text
+            else:
+                # Сохраняем текущий сегмент и переходим к следующему
+                merged_segments.append((current_start_time, current_end_time, current_text))
+                current_start_time, current_end_time, current_text = start_time, end_time, text
+
+    # Добавляем последний сегмент в список
+    merged_segments.append((current_start_time, current_end_time, current_text))
+    
+    return merged_segments
+
 def segment_and_save_videos(video_path, audio_path, time_segments, output_dir):
     video_clip = VideoFileClip(video_path)
     video_clip.audio.write_audiofile(audio_path)
     audio_clip = AudioFileClip(audio_path)
 
     video_clips = []
-    i=0
-    # current_clip = None
-    # new_time_segments = []
-    # for start_time, end_time, text in time_segments:
-    #     i += 1
-
-    #     # Создание субклипа для текущего сегмента
-    #     v_subclip = video_clip.subclip(start_time, end_time)
-    #     audio_file_path = os.path.join(output_dir, f"audio{str(i).zfill(3)}.wav")
-    #     v_subclip.audio.write_audiofile(audio_file_path)
-
-
-    #     # Если это первый клип или если разрыв меньше 5 секунд, объединяем
-    #     if current_clip is None:
-    #         current_clip = v_subclip
-    #         current_start = start_time
-    #         current_end = end_time
-    #     else:
-    #         time_gap = start_time - current_clip.end  # Вычисляем разрыв времени
-    #         if time_gap < 5:  # Проверяем, меньше ли разрыв 5 секунд
-    #             # Объединяем клипы
-    #             current_clip = concatenate_videoclips([current_clip, v_subclip])
-    #             audio_file_path = os.path.join(output_dir, f"audio{str(i).zfill(3)}.wav")
-    #             current_clip.audio.write_audiofile(audio_file_path)
-    #         else:
-    #             # Обрабатываем текущий объединённый клип
-    #             audio_file_path = os.path.join(output_dir, f"audio{str(i).zfill(3)}.wav")
-    #             current_clip.audio.write_audiofile(audio_file_path)
-
-    #             # Устанавливаем аудиотрек и записываем файл
-    #             output_file = os.path.join(output_dir, f"output{str(i).zfill(3)}.mp4")
-    #             current_clip.write_videofile(output_file, codec="libx264", audio_codec="aac")
-
-    #             # Начинаем новый клип
-    #             current_clip = v_subclip
-
-    # # После цикла обрабатываем оставшийся клип, если он есть
-    # if current_clip is not None:
-    #     audio_file_path = os.path.join(output_dir, f"audio{str(i).zfill(3)}.wav")
-    #     current_clip.audio.write_audiofile(audio_file_path)
-
-    #     # Устанавливаем аудиотрек и записываем файл
-    #     output_file = os.path.join(output_dir, f"output{str(i).zfill(3)}.mp4")
-    #     current_clip.write_videofile(output_file, codec="libx264", audio_codec="aac")
-    # audio_clips = []
     i = 0
     prev_end = 0
     for start_time, end_time, text in (time_segments):
