@@ -157,6 +157,28 @@ def generate(current_user):
 
         # Создаем VideoFileClip
         videoTemp = mp.VideoFileClip(temp_file.name)
+
+        # Извлекаем первый кадр
+        first_frame = videoTemp.get_frame(0)  # Получаем первый кадр (время в секундах)
+
+        # Сохраняем первый кадр как изображение во временный файл
+        preview_temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".jpg")
+        mp.ImageClip(first_frame).save_frame(preview_temp_file.name, t=0)
+
+        # Загружаем превью в S3
+        preview_object_name = str(uuid.uuid4()) + '.jpg'
+        with open(preview_temp_file.name, "rb") as img_file:
+            preview_length = len(img_file.read())
+            img_file.seek(0)  # Вернуться к началу файла для загрузки
+            client.put_object(
+                bucket_name=bucket,
+                object_name=preview_object_name,
+                data=img_file,
+                length=preview_length,
+                content_type='image/jpeg',
+            )
+
+
         video = Video(
             user_id=current_user.id,
             status=STATUS_CREATED,
@@ -166,6 +188,7 @@ def generate(current_user):
                 'size': sys.getsizeof(temp_file),  # Размер в ГБ
                 'duration': round(videoTemp.duration),  # Длительность в секундах
                 'created_at': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),  # Формат даты и времени
+                'preview': preview_object_name
             }
         )
 
