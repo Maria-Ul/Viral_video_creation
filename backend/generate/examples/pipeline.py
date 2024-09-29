@@ -96,13 +96,9 @@ def generate(video_file, body):
 
     # Сохранение информации о видео в базу данных
     with SessionLocal() as db:
-<<<<<<< HEAD
-        i = i+1
-=======
 
         i = 0
         print('segment_options', segment_options)
->>>>>>> 9ceaf6e8ac15f210cf59428d87aecd6f3fd07918
         segment_options = []
         # sorted_segments = sorted([(row['start'], row['end'], row['text']) for row in key_time_segments], key=lambda x: x[0])
         for start_time, end_time, text in key_time_segments:  # Исправьте здесь на правильные переменные
