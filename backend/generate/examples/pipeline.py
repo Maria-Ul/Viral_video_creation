@@ -90,12 +90,15 @@ def generate(video_file, body):
     # Сохранение информации о видео в базу данных
     with SessionLocal() as db:
         segment_options = []
-        for start_time, start_time, start_time in (key_time_segments):
-            segment_options.append({'start': start_time, 'end': start_time, 'text': text})
-        video = Video.query.filter(Video.id == body["id"]).first()
-        video.options['segments'] = key_time_segments
-        db.add(clip)
-        db.commit()
+        for start_time, end_time in key_time_segments:  # Исправьте здесь на правильные переменные
+            segment_options.append({'start': start_time, 'end': end_time, 'text': text})
+
+        video = db.query(Video).filter(Video.id == body["id"]).first()  # Используйте db.query вместо Video.query
+        if video:
+            video.options['segments'] = segment_options  # Обновляем опции
+            db.add(video)
+            db.commit()
+
         # Рекурсивный обход папок
         for root, _, files in os.walk(output_directory):
             for file in files:
