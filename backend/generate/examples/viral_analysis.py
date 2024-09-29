@@ -39,7 +39,9 @@ def get_key_segments(frame, transcript_text):
           if phrase in row['text']:
             key_segments.append(row)
     print('key_segments ', key_segments)
-    return set([(row['start'], row['end'], row['text']) for row in key_segments])
+    sorted_segments = sorted([(row['start'], row['end'], row['text']) for row in set(key_segments)], key=lambda x: x[0])
+    # sorted_unique_segments = set(sorted_segments)
+    return sorted_segments
 
 #analyzemotions?
 
